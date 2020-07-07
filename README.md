@@ -97,6 +97,10 @@ change the way Spack concretizes dependencies within a release branch.
 So, you can base your Spack deployment on a release branch and `git pull`
 to get fixes, without the package churn that comes with `develop`.
 
+The latest release is always available on the `releases/latest` branch.
+Note that doing a `git pull` on this branch can be disruptive when we
+make a major release, as package recipes will be updated.
+
 See the [docs on releases](https://spack.readthedocs.io/en/latest/developer_guide.html#releases)
 for more details.
 

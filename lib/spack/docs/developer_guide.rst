@@ -557,8 +557,10 @@ packages. They should generally only contain fixes to the Spack core.
 
 Both major and minor releases are tagged. After each release, we merge
 the release branch back into ``develop`` so that the version bump and any
-other release-specific changes are visible in the mainline (see
-:ref:`merging-releases-to-develop`).
+other release-specific changes are visible in the mainline. As a
+convenience, we also merge the latest release into ``releases/latest``,
+so that users can easily check out a single branch to get the latest
+stable version. See :ref:`merging-releases` for more details.
 
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -641,7 +643,7 @@ for a major release, the steps to make the release are as follows:
 
 #. Follow the steps in :ref:`publishing-releases`.
 
-#. Follow the steps in :ref:`merging-releases-to-develop`.
+#. Follow the steps in :ref:`merging-releases`.
 
 #. Follow the steps in :ref:`announcing-releases`.
 
@@ -744,7 +746,7 @@ release:
 
 #. Follow the steps in :ref:`publishing-releases`.
 
-#. Follow the steps in :ref:`merging-releases-to-develop`.
+#. Follow the steps in :ref:`merging-releases`.
 
 #. Follow the steps in :ref:`announcing-releases`.
 
@@ -794,32 +796,65 @@ Publishing a release on GitHub
       for ``download_count`` to see this.
 
 
-.. _merging-releases-to-develop:
+.. _merging-releases:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Merging back into ``develop``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
+Merging releases
+^^^^^^^^^^^^^^^^
 
-Once each release is complete, make sure that it is merged back into
-``develop`` with a merge commit:
+We merge each release into ``develop`` and into ``releases/latest``.
 
-.. code-block:: console
+#. Once each release is complete, make sure that it is merged back into
+   ``develop`` with a merge commit:
 
-   $ git checkout develop
-   $ git merge --no-ff releases/v0.15
-   $ git push
+   .. code-block:: console
 
-We merge back to ``develop`` because it:
+      $ git checkout develop
+      $ git merge --no-ff releases/v0.15
+      $ git push
 
-  * updates the version and ``CHANGELOG.md`` on ``develop``.
-  * ensures that your release tag is reachable from the head of
-    ``develop``
+   We merge back to ``develop`` because it:
 
-We *must* use a real merge commit (via the ``--no-ff`` option) because it
-ensures that the release tag is reachable from the tip of ``develop``.
-This is necessary for ``spack -V`` to work properly -- it uses ``git
-describe --tags`` to find the last reachable tag in the repository and
-reports how far we are from it. For example:
+     * updates the version and ``CHANGELOG.md`` on ``develop``.
+     * ensures that your release tag is reachable from the head of
+       ``develop``
+
+   We *must* use a real merge commit (via the ``--no-ff`` option) because it
+   ensures that the release tag is reachable from the tip of ``develop``.
+   This is necessary for ``spack -V`` to work properly -- it uses ``git
+   describe --tags`` to find the last reachable tag in the repository and
+   reports how far we are from it. For example:
+
+#. If the new release is the **highest** Spack release yet, you should
+   also merge it into ``releases/latest``. For example, suppose the
+   highest release is currently ``0.15.3``:
+
+     * If you are releasing ``0.15.4`` or ``0.16.0``, then you should
+       merge into ``releases/latest``, as these are higher than
+       ``0.15.3``.
+
+     * If you are making a new release of an **older** major version of
+       Spack, e.g. ``0.14.4``, then you should not merge this into
+       ``releases/latest`` (as there are newer major versions).
+
+   To merge into ``releases/latest``, do this:
+
+   .. code-block:: console
+
+      $ git checkout releases/latest
+      $ git merge --no-ff -X theirs releases/v0.15
+      $ git push
+
+   The ``-X theirs`` argument specifies that if there are merge
+   conflicts, we take what is in ``releases/v0.15``, and don't try to
+   combine differences. Basically, ``releases/latest`` is just a
+   convenience branch -- it gives users a pointer to whatever the latest
+   stable release is.
+
+   Keep in mind that when we make major releases, there will be quite a
+   bit of churn both in packages and in the core Spack tool. We recommend
+   using a specific release series and making a conscious decision to
+   jump to a new major release.
 
 .. code-block:: console
 
